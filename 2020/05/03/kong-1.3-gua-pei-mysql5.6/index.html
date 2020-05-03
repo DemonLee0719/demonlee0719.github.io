@@ -1,0 +1,1432 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+    <!-- shw2018 洪卫  modify 2019.08.15-->
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="KONG部署, 云计算 k8s docker kong">
+    <meta name="baidu-site-verification" content="fmlEuI34ir">
+    <meta name="google-site-verification" content="KeoTn_OFy4ndJwXNmm2gMeQfPhd7alqE9vQDwI32KCY">
+    <meta name="description" content="KONG 1.3适配mysql5.6What?API网关KONG是一个开源项目，详见 KONG官方文档
+Why?api网关KONG数据库目前只支持postgres和Cassandra，还有无数据库dbless。对于mysql没有支持，由于公">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>KONG部署 | Demon Lee&#39;s blog</title>
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+    
+    <style type="text/css">
+        
+            
+            code[class*="language-"],
+            pre[class*="language-"] {
+                white-space: pre !important;
+            }
+
+        
+    </style>
+
+    <script src="/libs/jquery/jquery-2.2.0.min.js"></script>
+    <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?46e79e71af0709a5b9106bf20cecc493";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+    
+    
+        <script>
+            (function(){
+                var bp = document.createElement('script');
+                var curProtocol = window.location.protocol.split(':')[0];
+                if (curProtocol === 'https') {
+                    bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+                }
+                else {
+                    bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+                }
+                var s = document.getElementsByTagName("script")[0];
+                s.parentNode.insertBefore(bp, s);
+            })();
+        </script>
+    
+
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
+
+    <body>
+
+        <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/demon.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Demon Lee's blog</span>
+                </a>
+            </div>
+            
+
+
+<!-- <a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right">
+    
+    <li class="hide-on-med-and-down">
+        <a href="/" class="waves-effect waves-light">
+            
+            <i class="fa fa-home"></i>
+            
+            <span>首页</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/archives" class="waves-effect waves-light">
+            
+            <i class="fa fa-archive"></i>
+            
+            <span>归档</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/about" class="waves-effect waves-light">
+            
+            <i class="fa fa-user-circle-o"></i>
+            
+            <span>关于我</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/friends" class="waves-effect waves-light">
+            
+            <i class="fa fa-address-book"></i>
+            
+            <span>友情链接</span>
+        </a>
+    </li>
+    
+    <li>
+        <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+            <i id="searchIcon" class="fa fa-search" title="搜索"></i>
+        </a>
+    </li>
+</ul> -->
+
+<!-- 支持二级菜单特性 洪卫 shw2018 modify 2019.09.17  -->
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right nav-menu">
+    
+      <li class="hide-on-med-and-down nav-item" >
+
+        
+            <a href="/" class="waves-effect waves-light">
+              
+                <i class="fa fa-home"></i>
+              
+              <span>首页</span>
+            </a>
+
+            
+      </li>
+    
+      <li class="hide-on-med-and-down nav-item" >
+
+        
+            <a href="/archives" class="waves-effect waves-light">
+              
+                <i class="fa fa-archive"></i>
+              
+              <span>归档</span>
+            </a>
+
+            
+      </li>
+    
+      <li class="hide-on-med-and-down nav-item" >
+
+        
+            <a href="/about" class="waves-effect waves-light">
+              
+                <i class="fa fa-user-circle-o"></i>
+              
+              <span>关于我</span>
+            </a>
+
+            
+      </li>
+    
+      <li class="hide-on-med-and-down nav-item" >
+
+        
+            <a href="/friends" class="waves-effect waves-light">
+              
+                <i class="fa fa-address-book"></i>
+              
+              <span>友情链接</span>
+            </a>
+
+            
+      </li>
+    
+
+    <li>
+        <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+            <i id="searchIcon" class="fa fa-search" title="搜索"></i>
+        </a>
+    </li>
+
+</ul>
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/demon.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Demon Lee's blog</div>
+        <div class="logo-desc">
+            
+            湖南师范大学 | 云计算 | API网关KONG
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li>
+            <a href="/" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-home"></i>
+                
+                首页
+            </a>
+        </li>
+        
+        <li>
+            <a href="/archives" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-archive"></i>
+                
+                归档
+            </a>
+        </li>
+        
+        <li>
+            <a href="/about" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-user-circle-o"></i>
+                
+                关于我
+            </a>
+        </li>
+        
+        <li>
+            <a href="/friends" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-address-book"></i>
+                
+                友情链接
+            </a>
+        </li>
+        
+        
+    </ul>
+
+   
+   
+<!-- 支持二级菜单特性 洪卫 shw2018 modify 2019.09.17  -->
+<!-- <ul class="menu-list mobile-menu-list">
+    
+        <li class="m-nav-item">
+                
+                    <a href="/" class="waves-effect waves-light">
+                        
+                        <i class="fa fa-fw fa-home"></i>
+                        
+                        首页
+                    </a>
+              
+            </li>
+        
+        <li class="m-nav-item">
+                
+                    <a href="/archives" class="waves-effect waves-light">
+                        
+                        <i class="fa fa-fw fa-archive"></i>
+                        
+                        归档
+                    </a>
+              
+            </li>
+        
+        <li class="m-nav-item">
+                
+                    <a href="/about" class="waves-effect waves-light">
+                        
+                        <i class="fa fa-fw fa-user-circle-o"></i>
+                        
+                        关于我
+                    </a>
+              
+            </li>
+        
+        <li class="m-nav-item">
+                
+                    <a href="/friends" class="waves-effect waves-light">
+                        
+                        <i class="fa fa-fw fa-address-book"></i>
+                        
+                        友情链接
+                    </a>
+              
+            </li>
+        
+
+        
+    </ul> -->
+
+</div>
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+        
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('请输入访问本文章的密码')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/banner/kong&docker.png')">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <div class="description center-align post-title">
+                        KONG部署
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        margin: 35px 0 15px 0;
+        padding-left: 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #toc-content .is-active-link::before {
+        background-color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- shw2018 洪卫  modify 2019.08.15-->
+<!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Hexo/" target="_blank">
+                                <span class="chip bg-color">Hexo</span>
+                            </a>
+                        
+                            <a href="/tags/Github/" target="_blank">
+                                <span class="chip bg-color">Github</span>
+                            </a>
+                        
+                            <a href="/tags/博客/" target="_blank">
+                                <span class="chip bg-color">博客</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fa fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/API-网关KONG/" class="post-category" target="_blank">
+                                API 网关KONG
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="post-info">
+                <div class="post-date info-break-policy">
+                    <i class="fa fa-calendar-minus-o fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2020-05-03
+                </div>
+
+                <div class="post-author info-break-policy">
+                    <i class="fa fa-user-o fa-fw"></i>作者:&nbsp;&nbsp;
+                    
+                        DemonLee
+                    
+                </div>
+
+                
+                
+                
+
+            </div>
+        </div>
+        <hr class="clearfix">
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="KONG-1-3适配mysql5-6"><a href="#KONG-1-3适配mysql5-6" class="headerlink" title="KONG 1.3适配mysql5.6"></a>KONG 1.3适配mysql5.6</h1><h2 id="What"><a href="#What" class="headerlink" title="What?"></a>What?</h2><p>API网关KONG是一个开源项目，详见 <a href="https://docs.konghq.com/" target="_blank" rel="noopener">KONG官方文档</a></p>
+<h2 id="Why"><a href="#Why" class="headerlink" title="Why?"></a>Why?</h2><p>api网关KONG数据库目前只支持postgres和Cassandra，还有无数据库dbless。对于mysql没有支持，由于公司大佬要求需要统一数据库mysql，所以只能基于kong1.3支持mysql。</p>
+<h2 id="How"><a href="#How" class="headerlink" title="How?"></a>How?</h2><p>mysql适配仅限于kong1.3版本。<br>主要代码部分在kong/db/strategies/mysql文件下，其中connector.lua文件主要适配，支持kong使用mysql。其中很多代码是借鉴postgres，若你下载我们适配的kong-mysql-support1.3，你会在mysql下看到很多postgres的影子，在kong/tools文件下还有借鉴章亦春大佬的mysql.lua，openresty中连接mysql的一个工具，有一些细微改动。<br><a href="https://github.com/DemonLee0719/kong-mysql-support-1.3.0" target="_blank" rel="noopener">GitHub代码地址</a></p>
+<h3 id="kong代码导读"><a href="#kong代码导读" class="headerlink" title="kong代码导读"></a>kong代码导读</h3><p>kong网关很多优秀的特性，如可扩展性，模块化，可移植性，插件机制等等这里不再详细描述，请参考官方文档 <a href="https://docs.konghq.com/" target="_blank" rel="noopener">KONG官方文档</a>，这里不再搬运。</p>
+<h4 id="kong项目代码结构"><a href="#kong项目代码结构" class="headerlink" title="kong项目代码结构"></a>kong项目代码结构</h4><p>kong/api：KONG主要对外的api管理，如service，routes等等，可以通过restful接口用于注册管理api等。定义模块的类型和格式，初度kong源码会有一些迷，比如，kong的关于路由route的接口是怎么实现的，就在kong/api下由模块统一管理。<br>kong/cluster_events：该目录下，是对于kong的event事件做统一同步，若你是通过k8s或者其他可节点方式部署，多节点信息同步实现在该文件下实现。可以在配置项db_update_frequency = 5，官方默认配置为5秒同步。当其他节点的信息有变动时，会把改动的数据写入到数据库中，有一个cluster_events表，当kong的实体，如service，route通过restful接口变动时，会将变动数据写入，其他节点会每5秒拉去数据，同步。<br>添加文件 kong/cluster_events/strategies/mysql.lua </p>
+<pre class="line-numbers language-lua"><code class="language-lua"><span class="token keyword">local</span> utils  <span class="token operator">=</span> require <span class="token string">"kong.tools.utils"</span>
+<span class="token keyword">local</span> mysql <span class="token operator">=</span> require <span class="token string">"kong.tools.mysql"</span>
+<span class="token keyword">local</span> pgmoon <span class="token operator">=</span> require <span class="token string">"pgmoon"</span>
+
+
+<span class="token keyword">local</span> max          <span class="token operator">=</span> math<span class="token punctuation">.</span>max
+<span class="token keyword">local</span> fmt          <span class="token operator">=</span> string<span class="token punctuation">.</span>format
+<span class="token keyword">local</span> null         <span class="token operator">=</span> ngx<span class="token punctuation">.</span>null
+<span class="token keyword">local</span> concat       <span class="token operator">=</span> table<span class="token punctuation">.</span>concat
+<span class="token keyword">local</span> setmetatable <span class="token operator">=</span> setmetatable
+<span class="token keyword">local</span> new_tab
+<span class="token keyword">do</span>
+  <span class="token keyword">local</span> ok
+  ok<span class="token punctuation">,</span> new_tab <span class="token operator">=</span> <span class="token function">pcall</span><span class="token punctuation">(</span>require<span class="token punctuation">,</span> <span class="token string">"table.new"</span><span class="token punctuation">)</span>
+  <span class="token keyword">if</span> <span class="token keyword">not</span> ok <span class="token keyword">then</span>
+    new_tab <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>narr<span class="token punctuation">,</span> nrec<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token keyword">end</span>
+  <span class="token keyword">end</span>
+<span class="token keyword">end</span>
+
+
+<span class="token keyword">local</span> INSERT_QUERY <span class="token operator">=</span> <span class="token string">[[
+INSERT INTO cluster_events(`id`, `node_id`, at, nbf, expire_at, channel, data)
+ VALUES(%s, %s, FROM_UNIXTIME(%f), FROM_UNIXTIME(%s), FROM_UNIXTIME(%s), %s, %s)
+]]</span>
+
+<span class="token keyword">local</span> SELECT_INTERVAL_QUERY <span class="token operator">=</span> <span class="token string">[[
+SELECT `id`, `node_id`, channel, data, UNIX_TIMESTAMP(at) as at, UNIX_TIMESTAMP(nbf) as  nbf
+FROM cluster_events
+WHERE channel IN (%s)
+  AND at >  FROM_UNIXTIME(%f)
+  AND at &lt;= FROM_UNIXTIME(%f)
+]]</span>
+
+
+<span class="token keyword">local</span> _M <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">local</span> mt <span class="token operator">=</span> <span class="token punctuation">{</span> __index <span class="token operator">=</span> _M <span class="token punctuation">}</span>
+
+
+<span class="token keyword">function</span> _M<span class="token punctuation">.</span><span class="token function">new</span><span class="token punctuation">(</span>db<span class="token punctuation">,</span> page_size<span class="token punctuation">,</span> event_ttl<span class="token punctuation">)</span>
+  <span class="token keyword">local</span> self  <span class="token operator">=</span> <span class="token punctuation">{</span>
+    db        <span class="token operator">=</span> db<span class="token punctuation">.</span>connector<span class="token punctuation">,</span>
+    <span class="token comment" spellcheck="true">--page_size = page_size,</span>
+    event_ttl <span class="token operator">=</span> event_ttl<span class="token punctuation">,</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> <span class="token function">setmetatable</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> mt<span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+
+
+<span class="token keyword">function</span> _M<span class="token punctuation">.</span><span class="token function">should_use_polling</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token keyword">true</span>
+<span class="token keyword">end</span>
+
+<span class="token keyword">function</span> _M<span class="token punctuation">:</span><span class="token function">insert</span><span class="token punctuation">(</span>node_id<span class="token punctuation">,</span> channel<span class="token punctuation">,</span> at<span class="token punctuation">,</span> data<span class="token punctuation">,</span> nbf<span class="token punctuation">)</span>
+  <span class="token keyword">local</span> expire_at <span class="token operator">=</span> <span class="token function">max</span><span class="token punctuation">(</span>at <span class="token operator">+</span> self<span class="token punctuation">.</span>event_ttl<span class="token punctuation">,</span> at<span class="token punctuation">)</span>
+
+  <span class="token keyword">if</span> <span class="token keyword">not</span> nbf <span class="token keyword">then</span>
+    nbf <span class="token operator">=</span> <span class="token string">"NULL"</span>
+  <span class="token keyword">end</span>
+
+  <span class="token keyword">local</span> my_id      <span class="token operator">=</span> ngx<span class="token punctuation">.</span><span class="token function">quote_sql_str</span><span class="token punctuation">(</span>utils<span class="token punctuation">.</span><span class="token function">uuid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">local</span> my_node_id <span class="token operator">=</span> ngx<span class="token punctuation">.</span><span class="token function">quote_sql_str</span><span class="token punctuation">(</span>node_id<span class="token punctuation">)</span>
+  <span class="token keyword">local</span> my_channel <span class="token operator">=</span> ngx<span class="token punctuation">.</span><span class="token function">quote_sql_str</span><span class="token punctuation">(</span>channel<span class="token punctuation">)</span>
+  <span class="token keyword">local</span> my_data    <span class="token operator">=</span> ngx<span class="token punctuation">.</span><span class="token function">quote_sql_str</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span>
+
+  <span class="token keyword">local</span> q <span class="token operator">=</span> <span class="token function">fmt</span><span class="token punctuation">(</span>INSERT_QUERY<span class="token punctuation">,</span> my_id<span class="token punctuation">,</span> my_node_id<span class="token punctuation">,</span> at<span class="token punctuation">,</span> nbf<span class="token punctuation">,</span> expire_at<span class="token punctuation">,</span>
+    my_channel<span class="token punctuation">,</span> my_data<span class="token punctuation">)</span>
+
+  <span class="token keyword">local</span> res<span class="token punctuation">,</span> err <span class="token operator">=</span> self<span class="token punctuation">.</span>db<span class="token punctuation">:</span><span class="token function">query</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span>
+  <span class="token keyword">if</span> <span class="token keyword">not</span> res <span class="token keyword">then</span>
+    <span class="token keyword">return</span> <span class="token keyword">nil</span><span class="token punctuation">,</span> <span class="token string">"could not insert invalidation row: "</span> <span class="token operator">..</span> err
+  <span class="token keyword">end</span>
+
+  <span class="token keyword">return</span> <span class="token keyword">true</span>
+<span class="token keyword">end</span>
+
+
+<span class="token keyword">function</span> _M<span class="token punctuation">:</span><span class="token function">select_interval</span><span class="token punctuation">(</span>channels<span class="token punctuation">,</span> min_at<span class="token punctuation">,</span> max_at<span class="token punctuation">)</span>
+  <span class="token keyword">local</span> n_chans <span class="token operator">=</span> <span class="token operator">#</span>channels
+  <span class="token keyword">local</span> my_channels <span class="token operator">=</span> <span class="token function">new_tab</span><span class="token punctuation">(</span>n_chans<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">for</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> n_chans <span class="token keyword">do</span>
+    my_channels<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> pgmoon<span class="token punctuation">.</span>Postgres<span class="token punctuation">.</span><span class="token function">escape_literal</span><span class="token punctuation">(</span><span class="token keyword">nil</span><span class="token punctuation">,</span> channels<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+  <span class="token keyword">end</span>
+
+  <span class="token keyword">local</span> q <span class="token operator">=</span> <span class="token function">fmt</span><span class="token punctuation">(</span>SELECT_INTERVAL_QUERY<span class="token punctuation">,</span> <span class="token function">concat</span><span class="token punctuation">(</span>my_channels<span class="token punctuation">,</span> <span class="token string">","</span><span class="token punctuation">)</span><span class="token punctuation">,</span> min_at<span class="token punctuation">,</span>
+    max_at<span class="token punctuation">)</span>
+
+  <span class="token keyword">local</span> ran
+
+  <span class="token comment" spellcheck="true">-- TODO: implement pagination for this strategy as</span>
+  <span class="token comment" spellcheck="true">-- well.</span>
+  <span class="token comment" spellcheck="true">--</span>
+  <span class="token comment" spellcheck="true">-- we need to behave like lua-cassandra's iteration:</span>
+  <span class="token comment" spellcheck="true">-- provide an iterator that enters the loop, with a</span>
+  <span class="token comment" spellcheck="true">-- page = 0 argument if there is no first page, and a</span>
+  <span class="token comment" spellcheck="true">-- page = 1 argument with the fetched rows elsewise</span>
+
+  <span class="token keyword">return</span> <span class="token keyword">function</span><span class="token punctuation">(</span>_<span class="token punctuation">,</span> p_rows<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> ran <span class="token keyword">then</span>
+      <span class="token keyword">return</span> <span class="token keyword">nil</span>
+    <span class="token keyword">end</span>
+
+    <span class="token keyword">local</span> res<span class="token punctuation">,</span> err <span class="token operator">=</span> self<span class="token punctuation">.</span>db<span class="token punctuation">:</span><span class="token function">query</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> <span class="token keyword">not</span> res <span class="token keyword">then</span>
+      <span class="token keyword">return</span> <span class="token keyword">nil</span><span class="token punctuation">,</span> err
+    <span class="token keyword">end</span>
+
+    <span class="token keyword">local</span> len <span class="token operator">=</span> <span class="token operator">#</span>res
+    <span class="token keyword">for</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> len <span class="token keyword">do</span>
+      <span class="token keyword">local</span> row <span class="token operator">=</span> res<span class="token punctuation">[</span>i<span class="token punctuation">]</span>
+      <span class="token keyword">if</span> row<span class="token punctuation">.</span>nbf <span class="token operator">==</span> null <span class="token keyword">then</span>
+        row<span class="token punctuation">.</span>nbf <span class="token operator">=</span> <span class="token keyword">nil</span>
+      <span class="token keyword">end</span>
+    <span class="token keyword">end</span>
+
+    <span class="token keyword">local</span> page <span class="token operator">=</span> len <span class="token operator">></span> <span class="token number">0</span> <span class="token keyword">and</span> <span class="token number">1</span> <span class="token keyword">or</span> <span class="token number">0</span>
+
+    ran <span class="token operator">=</span> <span class="token keyword">true</span>
+
+    <span class="token keyword">return</span> res<span class="token punctuation">,</span> err<span class="token punctuation">,</span> page
+  <span class="token keyword">end</span>
+<span class="token keyword">end</span>
+
+
+<span class="token keyword">function</span> _M<span class="token punctuation">:</span><span class="token function">truncate_events</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> self<span class="token punctuation">.</span>db<span class="token punctuation">:</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">"TRUNCATE cluster_events"</span><span class="token punctuation">)</span>
+<span class="token keyword">end</span>
+
+
+<span class="token keyword">return</span> _M<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>kong/cmd： 当前目录下是kong相关命令是实现，这里不再详细描述。<br>相关命令参考kong/cmd/init.lua</p>
+<pre class="line-numbers language-lua"><code class="language-lua"><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"kong.globalpatches"</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">{</span>cli <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+math<span class="token punctuation">.</span><span class="token function">randomseed</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">-- Generate PRNG seed</span>
+
+<span class="token keyword">local</span> pl_app <span class="token operator">=</span> require <span class="token string">"pl.lapp"</span>
+<span class="token keyword">local</span> log <span class="token operator">=</span> require <span class="token string">"kong.cmd.utils.log"</span>
+
+<span class="token keyword">local</span> options <span class="token operator">=</span> <span class="token string">[[
+ --v              verbose
+ --vv             debug
+]]</span>
+
+<span class="token keyword">local</span> cmds_arr <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">local</span> cmds <span class="token operator">=</span> <span class="token punctuation">{</span>
+  start <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  stop <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  quit <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  restart <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  reload <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  health <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  check <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  prepare <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  migrations <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  version <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  config <span class="token operator">=</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  roar <span class="token operator">=</span> <span class="token keyword">true</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>kong/db：该目录下是kong对数据库的支持，适配mysql中的主要工作在此，需要对很多数据层做支持，还有sql语句改写，以及相关策略改动<br>kong/db/migrations/core下是在执行kong migrations bootstraps时会初始化数据表，当前提是当前连接的数据库中有kong这个一个数据库，不然会报错。<br>kong/db/strategies下是度数据库选择策略的适配，官方目前有Cassandra，postgres,off，这里对mysql做了适配。可放心使用。</p>
+<p>kong/pdk： 该目录下的文件是对kong有开发需求的开发人员提供特定的pdk方法，若想要开发相关插件，需要关注这个一块。话说，kong官方的插件很多还是需要自己二次开发滴！！！</p>
+<p>kong/plugins：该目录下放着需要的一些插件，可以在当前目录下开发自己自定义的插件。请参考kong插件开发规范开发插件，比较容易。插件的使用导入需要在kong/constants.lua文件中体现<br>kong/constants.lua部分代码</p>
+<pre class="line-numbers language-lua"><code class="language-lua"><span class="token keyword">local</span> plugins <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token string">"jwt"</span><span class="token punctuation">,</span>
+  <span class="token string">"acl"</span><span class="token punctuation">,</span>
+  <span class="token string">"correlation-id"</span><span class="token punctuation">,</span>
+  <span class="token string">"cors"</span><span class="token punctuation">,</span>
+  <span class="token string">"oauth2"</span><span class="token punctuation">,</span>
+  <span class="token string">"tcp-log"</span><span class="token punctuation">,</span>
+  <span class="token string">"udp-log"</span><span class="token punctuation">,</span>
+  <span class="token string">"file-log"</span><span class="token punctuation">,</span>
+  <span class="token string">"http-log"</span><span class="token punctuation">,</span>
+  <span class="token string">"key-auth"</span><span class="token punctuation">,</span>
+  <span class="token string">"hmac-auth"</span><span class="token punctuation">,</span>
+  <span class="token string">"basic-auth"</span><span class="token punctuation">,</span>
+  <span class="token string">"ip-restriction"</span><span class="token punctuation">,</span>
+  <span class="token comment" spellcheck="true">--"request-transformer",</span>
+  <span class="token string">"response-transformer"</span><span class="token punctuation">,</span>
+  <span class="token string">"request-size-limiting"</span><span class="token punctuation">,</span>
+  <span class="token string">"rate-limiting"</span><span class="token punctuation">,</span>
+  <span class="token string">"response-ratelimiting"</span><span class="token punctuation">,</span>
+  <span class="token string">"syslog"</span><span class="token punctuation">,</span>
+  <span class="token string">"loggly"</span><span class="token punctuation">,</span>
+  <span class="token string">"datadog"</span><span class="token punctuation">,</span>
+  <span class="token string">"ldap-auth"</span><span class="token punctuation">,</span>
+  <span class="token string">"statsd"</span><span class="token punctuation">,</span>
+  <span class="token string">"bot-detection"</span><span class="token punctuation">,</span>
+  <span class="token string">"aws-lambda"</span><span class="token punctuation">,</span>
+  <span class="token string">"request-termination"</span><span class="token punctuation">,</span>
+  <span class="token comment" spellcheck="true">-- external plugins</span>
+  <span class="token comment" spellcheck="true">--"azure-functions",</span>
+  <span class="token comment" spellcheck="true">--"kubernetes-sidecar-injector",</span>
+  <span class="token comment" spellcheck="true">--"zipkin",</span>
+  <span class="token comment" spellcheck="true">--"pre-function",</span>
+  <span class="token comment" spellcheck="true">--"post-function",</span>
+  <span class="token comment" spellcheck="true">--"prometheus",</span>
+  <span class="token comment" spellcheck="true">--"proxy-cache",</span>
+  <span class="token comment" spellcheck="true">--"session",</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>kong/resty：当前目录是加载相关openresty 的某些文件，没有详细研究</p>
+<p>kong/runloop：此目录下的文件上kong主要和nginx交互的文件目录，相关api注册还有路由转发，环平衡，健康检查等相关在这。</p>
+<p>kong/templates：当前目录下是配置一些nginx的文件，通过导入，直接配置到nginx.conf文件。</p>
+<p>kong/tools：工具类目录</p>
+<p>kong/route.lua：该lua主要服务kong的路由转发还有就是一些初始化路由检查，路由加载等。</p>
+<p>更多需要详细阅读源码，这里只浅显解读一下。</p>
+<h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><h3 id="0运行容器不退出，调试需要"><a href="#0运行容器不退出，调试需要" class="headerlink" title="0运行容器不退出，调试需要"></a>0运行容器不退出，调试需要</h3><pre class="line-numbers language-shell"><code class="language-shell">docker run -itd --rm  kong:1.3 /bin/bash -c "while true;do echo hello docker;sleep 1;done"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h3 id="1重启docker"><a href="#1重启docker" class="headerlink" title="1重启docker"></a>1重启docker</h3><pre class="line-numbers language-shell"><code class="language-shell">systemctl daemon-reload && systemctl restart docker<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>postgres 镜像： postgres:9.6 （自行dockerhub下载）<br>kong 1.3版本镜像： kong:1.3 （自行dockerhub下载）<br>mysql镜像： mysql:5.6          （自行dockerhub下载）<br>kong-mysql适配镜像： kong-mysql-support:1.3<br>这个dockerfile比较简单粗暴，代码仓库中很多插件都屏蔽了，若读者想要添加一些我在代码中屏蔽的插件，需要自行适配mysql</p>
+<pre class="line-numbers language-dockerfile"><code class="language-dockerfile">FROM kong:1.3
+RUN rm -rf /usr/local/share/lua/5.1/kong
+COPY kong /usr/local/share/lua/5.1/kong<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="postgres-kong-官方docker部署方式"><a href="#postgres-kong-官方docker部署方式" class="headerlink" title="postgres + kong 官方docker部署方式"></a>postgres + kong 官方docker部署方式</h2><p>#1 创建本地卷pgdata</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker volume create pgdate<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>#2 创建kong-net-postgres</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker network create kong-net-postgres<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>#3 创建 pg-kong 容器</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run -d --name pg-kong  \ 
+        --network<span class="token operator">=</span>kong-net-postgres  \ 
+        -v pgdate:/var/postgres/data \ 
+        -p 5432:5432 \ 
+        -e <span class="token string">"POSTGRES_U SER=kong"</span> \ 
+        -e <span class="token string">"POSTGRES_DB=kong"</span> \ 
+        -e <span class="token string">"POSTGRES_PASSWORD=kong"</span> \ 
+        postgres:9.6<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>#4 初始化kong在pg中的数据库</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run --rm \
+     --network<span class="token operator">=</span>kong-net-postgres \
+     -e <span class="token string">"KONG_DATABASE=postgres"</span> \
+     -e <span class="token string">"KONG_PG_HOST=ps-kong"</span>   \
+     -e <span class="token string">"KONG_PG_PASSWORD=kong"</span>  \
+     kong:1.3 kong migrations bootstrap --vv <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>#5 启动kong容器<br>##1 开放管理端口，为了好调试，开放所有端口，生成环境不建议这么做。</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run -d --name kong-postgres  \
+     --network<span class="token operator">=</span>kong-net-postgres    \
+     -e <span class="token string">"KONG_DATABASE=postgres"</span>    \
+     -e <span class="token string">"KONG_PG_HOST=ps-kong"</span>      \
+     -e <span class="token string">"KONG_PG_PASSWORD=kong"</span>  \
+     -e <span class="token string">"KONG_PROXY_ACCESS_LOG=/dev/stdout"</span> \
+     -e <span class="token string">"KONG_ADMIN_ACCESS_LOG=/dev/stdout"</span> \
+     -e <span class="token string">"KONG_PROXY_ERROR_LOG=/dev/stderr"</span>  \
+     -e <span class="token string">"KONG_ADMIN_ERROR_LOG=/dev/stderr"</span>  \
+     -e <span class="token string">"KONG_ADMIN_LISTEN=0.0.0.0:18001, 0.0.0.0:18444 ssl"</span> \
+     -e <span class="token string">"KONG_PROXY_LISTEN=0.0.0.0:18000, 0.0.0.0:18443 ssl"</span> \
+     -p 18000:18000 \
+     -p 18443:18443 \
+     -p 18001:18001 \
+     -p 18444:18444 \
+     kong:1.3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>##2关闭管理端口，建议生产环境配置</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run -d --name kong-postgres  \
+     --network<span class="token operator">=</span>kong-net-postgres    \
+     -e <span class="token string">"KONG_DATABASE=postgres"</span>    \
+     -e <span class="token string">"KONG_PG_HOST=ps-kong"</span>      \
+     -e <span class="token string">"KONG_PG_PASSWORD=kong"</span>  \
+     -e <span class="token string">"KONG_PROXY_ACCESS_LOG=/dev/stdout"</span> \
+     -e <span class="token string">"KONG_ADMIN_ACCESS_LOG=/dev/stdout"</span> \
+     -e <span class="token string">"KONG_PROXY_ERROR_LOG=/dev/stderr"</span>  \
+     -e <span class="token string">"KONG_ADMIN_ERROR_LOG=/dev/stderr"</span>  \
+     -e <span class="token string">"KONG_ADMIN_LISTEN=0.0.0.0:18001, 0.0.0.0:18444 ssl"</span> \
+     -e <span class="token string">"KONG_PROXY_LISTEN=0.0.0.0:18000, 0.0.0.0:18443 ssl"</span> \
+     -p 18000:18000 \
+     -p 18443:18443 \
+     -p 127.0.0.1:18001:18001 \
+     -p 127.0.0.1:18444:18444 \
+     kong:1.3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="mysql-kong-mysql适配版"><a href="#mysql-kong-mysql适配版" class="headerlink" title="mysql + kong  mysql适配版"></a>mysql + kong  mysql适配版</h2><p>#1 创建本地卷mysqldata<br>docker volume create mysqldata<br>#2 创建kong-net-mysql<br>docker network create kong-net-mysql<br>#3 创建 mysql-kong 容器</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run -d --name mysql-kong \
+               --network<span class="token operator">=</span>kong-net-mysql \
+               -v mysqldata:/var/mysql/data \
+               -p 3306:3306 \
+               -e <span class="token string">"MYSQL_USER=kong"</span> \
+               -e <span class="token string">"MYSQL_DB=kong"</span> \
+               -e <span class="token string">"MYSQL_PASSWORD=kong"</span> \
+               demonlee/mysql:5.5<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>#4 初始化kong在mysql中的数据库</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run --rm \
+     --network<span class="token operator">=</span>kong-net-mysql \
+     -e <span class="token string">"KONG_DATABASE=mysql"</span> \
+     -e <span class="token string">"KONG_MYSQL_HOST=mysql-kong"</span> \
+     -e <span class="token string">"KONG_MYSQL_PASSWORD=kong"</span> \
+     demonlee/kong:1.3 kong migrations bootstrap<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>#5 启动kong容器</p>
+<pre class="line-numbers language-bash"><code class="language-bash">docker run -d --name kong-mysql \
+     --network<span class="token operator">=</span>kong-net-mysql \
+     -e <span class="token string">"KONG_DATABASE=mysql"</span> \
+     -e <span class="token string">"KONG_MYSQL_HOST=mysql-kong"</span> \
+     -e <span class="token string">"KONG_MYSQL_PASSWORD=kong"</span> \
+     -e <span class="token string">"KONG_PROXY_ACCESS_LOG=/dev/stdout"</span> \
+     -e <span class="token string">"KONG_ADMIN_ACCESS_LOG=/dev/stdout"</span> \
+     -e <span class="token string">"KONG_PROXY_ERROR_LOG=/dev/stderr"</span> \
+     -e <span class="token string">"KONG_ADMIN_ERROR_LOG=/dev/stderr"</span> \
+     -e <span class="token string">"KONG_ADMIN_LISTEN=0.0.0.0:28001, 0.0.0.0:28444 ssl"</span> \
+     -e <span class="token string">"KONG_PROXY_LISTEN=0.0.0.0:28000, 0.0.0.0:28443 ssl"</span> \
+     -p 28000:28000 \
+     -p 28443:28443 \
+     -p 28001:28001 \
+     -p 28444:28444 \
+     demonlee/kong:1.3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<script>
+        document.querySelectorAll('.github-emoji')
+          .forEach(el => {
+            if (!el.dataset.src) { return; }
+            const img = document.createElement('img');
+            img.style = 'display:none !important;';
+            img.src = el.dataset.src;
+            img.addEventListener('error', () => {
+              img.remove();
+              el.style.color = 'inherit';
+              el.style.backgroundImage = 'none';
+              el.style.background = 'none';
+            });
+            img.addEventListener('load', () => {
+              img.remove();
+            });
+            document.body.appendChild(img);
+          });
+      </script>
+            </div>
+            <hr/>
+
+            
+            <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.88rem;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-large waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fa fa-close"></i></a>
+            <h4 class="reward-title">如果文章对你有帮助，请作者喝杯冰阔落如何！</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/ali.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+            
+
+            <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    <div class="social-share" data-disabled="qzone" data-wechat-qrcode-helper="<p>微信里点“发现”->“扫一扫”二维码便可查看分享。</p>"></div>
+    
+</div>
+
+<script src="/libs/share/js/social-share.min.js"></script>
+
+            
+            
+            
+            <div class="reprint1">
+                <p>
+                    <span class="reprint1-tip">
+                        <i class="fa fa-exclamation-circle"></i>&nbsp;&nbsp;转载请注明:
+                    </span>
+                    <a href="http://demonlee.top" class="b-link-green">Demon Lee's blog</a>
+                    <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
+                    <a href="/2020/05/03/kong-1.3-gua-pei-mysql5.6/" class="b-link-green">KONG部署</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fa fa-dot-circle-o"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2020/05/03/kong-1.3-gua-pei-mysql5.6/">
+                    <div class="card-image">
+                        
+                        <img src="/medias/banner/kong&amp;docker.png" class="responsive-img" alt="KONG部署">
+                        
+                        <span class="card-title">KONG部署</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            总结一下上一份工作的有关于API 网关KONG的内容，简单做一下回顾和总结
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-05-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/API-网关KONG/" class="post-category" target="_blank">
+                                    API 网关KONG
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Hexo/" target="_blank">
+                        <span class="chip bg-color">Hexo</span>
+                    </a>
+                    
+                    <a href="/tags/Github/" target="_blank">
+                        <span class="chip bg-color">Github</span>
+                    </a>
+                    
+                    <a href="/tags/博客/" target="_blank">
+                        <span class="chip bg-color">博客</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                本篇&nbsp;<i class="fa fa-dot-circle-o"></i>
+            </div>
+            <div class="card">
+                <a href="/2020/05/03/kong-1.3-gua-pei-mysql5.6/">
+                    <div class="card-image">
+                        
+                        <img src="/medias/banner/kong&amp;docker.png" class="responsive-img" alt="KONG部署">
+                        
+                        <span class="card-title">KONG部署</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            总结一下上一份工作的有关于API 网关KONG的内容，简单做一下回顾和总结
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-05-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/API-网关KONG/" class="post-category" target="_blank">
+                                    API 网关KONG
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Hexo/" target="_blank">
+                        <span class="chip bg-color">Hexo</span>
+                    </a>
+                    
+                    <a href="/tags/Github/" target="_blank">
+                        <span class="chip bg-color">Github</span>
+                    </a>
+                    
+                    <a href="/tags/博客/" target="_blank">
+                        <span class="chip bg-color">博客</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+</div>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget">
+            <div class="toc-title"><i class="fa fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fa fa-list"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            // headingsOffset: -205,
+            headingSelector: 'h1, h2, h3, h4, h5'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h1, h2, h3, h4, h5').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).slideUp(500);
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).slideDown(500);
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+    
+
+</main>
+
+
+        <footer class="page-footer bg-color">
+    <div class="container row center-align">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&copy; 2020 DemonLee.
+
+            <br>
+            <span id="sitetime"></span><span class="my-face">ღゝ◡╹)ノ♡</span>
+            <br>
+
+            
+
+            
+
+            
+
+            
+            <br>
+
+        </div>
+
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/DemonLee0719" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fa fa-github"></i>
+    </a>
+
+
+ 
+    <a href="https://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=1337843566@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fa fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+    <a href="http://wpa.qq.com/msgrd?v=3&uin=1337843566&site=qq&menu=yes" class="tooltipped" target="_blank" data-tooltip="访问我的QQ空间" data-position="top" data-delay="50">
+        <i class="fa fa-qq"></i>
+    </a>
+
+
+
+    <a href="https://weibo.com/5300041943" class="tooltipped" target="_blank" data-tooltip="关注我的微博" data-position="top" data-delay="50">
+        <i class="fa fa-weibo"></i>
+    </a>
+</div>
+
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+<script language=javascript>
+    function siteTime() {
+        window.setTimeout("siteTime()", 1000);
+        var seconds = 1000;
+        var minutes = seconds * 60;
+        var hours = minutes * 60;
+        var days = hours * 24;
+        var years = days * 365;
+        var today = new Date();
+        var todayYear = today.getFullYear();
+        var todayMonth = today.getMonth() + 1;
+        var todayDate = today.getDate();
+        var todayHour = today.getHours();
+        var todayMinute = today.getMinutes();
+        var todaySecond = today.getSeconds();
+
+        /* Date.UTC() -- 返回date对象距世界标准时间(UTC)1970年1月1日午夜之间的毫秒数(时间戳)
+        year - 作为date对象的年份，为4位年份值
+        month - 0-11之间的整数，做为date对象的月份
+        day - 1-31之间的整数，做为date对象的天数
+        hours - 0(午夜24点)-23之间的整数，做为date对象的小时数
+        minutes - 0-59之间的整数，做为date对象的分钟数
+        seconds - 0-59之间的整数，做为date对象的秒数
+        microseconds - 0-999之间的整数，做为date对象的毫秒数 */
+
+        var t1 = Date.UTC(2014, 08, 23, 14, 25, 19);
+        var t2 = Date.UTC(todayYear, todayMonth, todayDate, todayHour, todayMinute, todaySecond);
+        var diff = t2 - t1;
+        var diffYears = Math.floor(diff / years);
+        var diffDays = Math.floor((diff / days) - diffYears * 365);
+        var diffHours = Math.floor((diff - (diffYears * 365 + diffDays) * days) / hours);
+        var diffMinutes = Math.floor((diff - (diffYears * 365 + diffDays) * days - diffHours * hours) / minutes);
+        var diffSeconds = Math.floor((diff - (diffYears * 365 + diffDays) * days - diffHours * hours - diffMinutes *
+            minutes) / seconds);
+        document.getElementById("sitetime").innerHTML = "本站已勉强运行 " + diffYears + " 年 " + diffDays + " 天 " + diffHours +
+            " 小时 " + diffMinutes + " 分钟 " + diffSeconds + " 秒" ;
+    } /*因为建站时间还没有一年，就将之注释掉了。需要的可以取消*/
+    siteTime();
+</script>
+
+
+
+
+
+
+        <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fa fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+$(function () {
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+});
+</script>
+        <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+        <script src="/libs/materialize/materialize.min.js"></script>
+        <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+        <script src="/libs/aos/aos.js"></script>
+        <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+        <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+        <script src="/js/matery.js"></script>
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+
+        
+            <script src="/libs/others/clicklove.js"></script>
+        
+
+        
+
+        <!-- 洪卫 shw2018 add 2019.08.28 -->
+        <script type="text/javascript">
+            var OriginTitile = document.title,
+                st;
+            document.addEventListener("visibilitychange", function () {
+                document.hidden ? (document.title = "看不见我🙈~看不见我🙈~", clearTimeout(st)) : (document.title =
+                    "(๑•̀ㅂ•́) ✧被发现了～", st = setTimeout(function () {
+                        document.title = OriginTitile
+                    }, 3e3))
+            })
+        </script>
+
+        <!-- 鼠标点击烟花爆炸效果  洪卫 shw2018 add 2019.09.09 -->
+        
+            <canvas class="fireworks" style="position: fixed; left: 0; top: 0; z-index: 1; pointer-events: none;"></canvas>
+            <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+            <script type="text/javascript" src="/js/fireworks.js"></script>
+        
+
+        <!-- 背景雪花飘落特效洪卫 shw2018 add 2019.09.10 -->
+        
+            <script type="text/javascript">
+            //只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/js/sakura.js"><\/script>');
+            }
+            </script>
+        
+
+        <!-- 鼠标点击文字特效 洪卫 shw2018 add 2019.09.10-->
+        
+            <script src="/js/wenzi.js" type="text/javascript"></script>
+        
+
+        <!-- 背景雪花飘落特效 洪卫 shw2018 add 2019.09.10 -->
+        
+            <script type="text/javascript">
+                var windowWidth = $(window).width();
+                if (windowWidth > 768) {
+                    document.write('<script type="text/javascript" src="/js/xuehuapiaoluo.js"><\/script>');
+                }
+            </script>
+        
+
+        <!-- 在线聊天工具  洪卫 shw2018 add 2019.09.11 -->
+        
+
+        <!-- 背景 canvas-nest  洪卫 shw 2018  add 2019.09.15
+        
+            <script type="text/javascript">
+            var windowWidth = $(window).width();
+            if (windowWidth > 992) {
+                document.write('<script type="text/javascript" color="0,0,255" pointColor="0,0,255" opacity= "0.8" zIndex="--1" count="150"src="/libs/background/canvas-nest.js"><\/script>');
+            }
+            </script>
+        
+        -->
+
+        <!-- 背景静止彩带  洪卫 shw 2018  add 2019.09.15-->
+        
+
+        <!-- 背景动态彩带 洪卫 shw 2018  add 2019.09.15-->
+        
+            <script type="text/javascript">
+            var windowWidth = $(window).width();
+            if (windowWidth > 992) {
+                document.write('<script type="text/javascript" src="/libs/background/ribbon-dynamic.js"><\/script>');
+            }
+            </script>
+        
+
+    <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":200},"mobile":{"show":false},"react":{"opacity":0.7}});</script><script>!function(e){var r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function t(){for(var c=0;c<r.length;c++)t=r[c],void 0,0<=(n=t.getBoundingClientRect()).top&&0<=n.left&&n.top<=(e.innerHeight||document.documentElement.clientHeight)&&function(){var t,n,e,i,o=r[c];t=o,n=function(){r=r.filter(function(t){return o!==t})},e=new Image,i=t.getAttribute("data-original"),e.onload=function(){t.src=i,n&&n()},e.src=i}();var t,n}t(),e.addEventListener("scroll",function(){!function(t,n){clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(n)},500)}(t,e)})}(this);</script></body>
+</html>
