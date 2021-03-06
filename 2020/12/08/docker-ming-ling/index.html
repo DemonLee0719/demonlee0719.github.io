@@ -14,8 +14,7 @@ eg:
 docker run --name mynginx -p 8081:80 -d nginx
 
 docker 启动容器
-
-        document.querySelectorAll(&#39;">
+运行命令hexo clean（清除生成文件），hexo g（生成网页），">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -495,6 +494,7 @@ eg:
 docker run --name mynginx -p 8081:80 -d nginx
 
 </code></pre><p>docker 启动容器</p>
+<pre class="line-numbers language-angular2"><code class="language-angular2">运行命令hexo clean（清除生成文件），hexo g（生成网页）， hexo s（本地预览），hexo d（部署）<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <script>
         document.querySelectorAll('.github-emoji')
           .forEach(el => {
@@ -707,8 +707,7 @@ eg:
 docker run --name mynginx -p 8081:80 -d nginx
 
 docker 启动容器
-
-        document.querySelectorAll('
+运行命令hexo clean（清除生成文件），hexo g（生成网页），
                         
                     </div>
                     <div class="publish-info">
@@ -798,12 +797,6 @@ docker 启动容器
 
 <!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fa fa-list"></i>
-    </a>
-</div>
-
 
 <script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
@@ -842,41 +835,6 @@ docker 启动容器
             }
         });
 
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).slideUp(500);
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).slideDown(500);
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
         
     });
 </script>
@@ -1020,8 +978,6 @@ $(function () {
 
 
         
-            <script src="/libs/others/clicklove.js"></script>
-        
 
         
 
@@ -1039,48 +995,20 @@ $(function () {
 
         <!-- 鼠标点击烟花爆炸效果  洪卫 shw2018 add 2019.09.09 -->
         
-            <canvas class="fireworks" style="position: fixed; left: 0; top: 0; z-index: 1; pointer-events: none;"></canvas>
-            <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
-            <script type="text/javascript" src="/js/fireworks.js"></script>
-        
 
         <!-- 背景雪花飘落特效洪卫 shw2018 add 2019.09.10 -->
-        
-            <script type="text/javascript">
-            //只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="/js/sakura.js"><\/script>');
-            }
-            </script>
         
 
         <!-- 鼠标点击文字特效 洪卫 shw2018 add 2019.09.10-->
         
-            <script src="/js/wenzi.js" type="text/javascript"></script>
-        
 
         <!-- 背景雪花飘落特效 洪卫 shw2018 add 2019.09.10 -->
-        
-            <script type="text/javascript">
-                var windowWidth = $(window).width();
-                if (windowWidth > 768) {
-                    document.write('<script type="text/javascript" src="/js/xuehuapiaoluo.js"><\/script>');
-                }
-            </script>
         
 
         <!-- 在线聊天工具  洪卫 shw2018 add 2019.09.11 -->
         
 
         <!-- 背景 canvas-nest  洪卫 shw 2018  add 2019.09.15
-        
-            <script type="text/javascript">
-            var windowWidth = $(window).width();
-            if (windowWidth > 992) {
-                document.write('<script type="text/javascript" color="0,0,255" pointColor="0,0,255" opacity= "0.8" zIndex="--1" count="150"src="/libs/background/canvas-nest.js"><\/script>');
-            }
-            </script>
         
         -->
 
@@ -1089,13 +1017,6 @@ $(function () {
 
         <!-- 背景动态彩带 洪卫 shw 2018  add 2019.09.15-->
         
-            <script type="text/javascript">
-            var windowWidth = $(window).width();
-            if (windowWidth > 992) {
-                document.write('<script type="text/javascript" src="/libs/background/ribbon-dynamic.js"><\/script>');
-            }
-            </script>
-        
 
-    <script>!function(e){var r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function t(){for(var c=0;c<r.length;c++)t=r[c],void 0,0<=(n=t.getBoundingClientRect()).top&&0<=n.left&&n.top<=(e.innerHeight||document.documentElement.clientHeight)&&function(){var t,n,e,i,o=r[c];t=o,n=function(){r=r.filter(function(t){return o!==t})},e=new Image,i=t.getAttribute("data-original"),e.onload=function(){t.src=i,n&&n()},e.src=i}();var t,n}t(),e.addEventListener("scroll",function(){!function(t,n){clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(n)},500)}(t,e)})}(this);</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":200},"mobile":{"show":false},"react":{"opacity":0.7}});</script></body>
+    <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":200},"mobile":{"show":false},"react":{"opacity":0.7}});</script><script>!function(e){var r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function t(){for(var c=0;c<r.length;c++)t=r[c],void 0,0<=(n=t.getBoundingClientRect()).top&&0<=n.left&&n.top<=(e.innerHeight||document.documentElement.clientHeight)&&function(){var t,n,e,i,o=r[c];t=o,n=function(){r=r.filter(function(t){return o!==t})},e=new Image,i=t.getAttribute("data-original"),e.onload=function(){t.src=i,n&&n()},e.src=i}();var t,n}t(),e.addEventListener("scroll",function(){!function(t,n){clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(n)},500)}(t,e)})}(this);</script></body>
 </html>
